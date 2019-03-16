@@ -8,6 +8,7 @@ import math as m
 import random
 import numpy as np
 
+random.seed(0)
 
 class Perceptron:
     def __init__(self, NumeroDeNeuronasPorCapa): #Arreglo de enteros ej. [3, 3, 3] son tres capas con tres neuronas
@@ -18,7 +19,7 @@ class Perceptron:
             if(i==0):
                 self.capas.append(Capa(NumeroDeNeuronasPorCapa[i], NumeroDeNeuronasPorCapa[i]))
             else:
-                self.capas.append(Capa(NumeroDeNeuronasPorCapa[i-1], NumeroDeNeuronasPorCapa[i]))
+                self.capas.append(Capa(NumeroDeNeuronasPorCapa[i], NumeroDeNeuronasPorCapa[i-1]))
                 
     def Activacion(self, inputs):
         
@@ -32,25 +33,26 @@ class Perceptron:
     
     def ErrorPorNeurona(self, SalidasReales, SalidasDeseadas):
         error=0
+        print(SalidasReales, SalidasDeseadas)
         for i in range (0, len(SalidasReales)):
             #print("La salida es ", SalidasDeseadas[i])
             #print("La salida esperada es ", SalidasReales[i])
-            error+=  m.pow((SalidasReales[i]-SalidasDeseadas[i]), 2)
-        print(SalidasReales)
+            error+= 0.5* m.pow((SalidasReales[i]-SalidasDeseadas[i]), 2)
+        #print(SalidasReales)
         return error
     
     
     def ErrorGeneral(self, inputs, SalidasDeseadas):
         error=0
-        for i in range(0, len(inputs)):
-            
+        for i in range(0, len(inputs)):   
             error+=self.ErrorPorNeurona([self.Activacion(inputs[i])], [SalidasDeseadas[i]])
+        #print(error)
         return error
     
     def Aprendizaje(self, Entrada, SalidaDeseada, alfa, errorMax):
         error=99999
         while(error>errorMax):
-            self.Backpropagation(Entrada, SalidaDeseada, alfa) #Posible Correcion
+            self.Backpropagation(Entrada, SalidaDeseada, alfa) #
             error=self.ErrorGeneral(Entrada, SalidaDeseada)
             #print(error)
             
@@ -79,13 +81,14 @@ class Perceptron:
                     
         """
                 
-    def FijarPesos(self, alfa):
+    def ActualizarPesos(self, alfa):
         for i in range(0, len(self.capas)):
             for j in range(0, len(self.capas[i].neuronas_capa)):
                 for k in range(0, len(self.capas[i].neuronas_capa[j].pesos)):
+                #    print(alfa*self.deltas[i][j][k])
                     self.capas[i].neuronas_capa[j].pesos[k]-=alfa*self.deltas[i][j][k]
                     
-    def FijarBias(self, alfa):
+    def ActualizarBias(self, alfa):
         for i in range(0, len(self.capas)):
             for j in range(0, len(self.capas[i].neuronas_capa)):
                 self.capas[i].neuronas_capa[j].bias-=alfa*self.sigmas[i][j]
@@ -109,14 +112,7 @@ class Perceptron:
                     
                     self.sigmas[i][j]=Neurona(0).DerivadaSigmoide(self.capas[i].neuronas_capa[j].ultimaactivacion)*suma
                     
-    def ActualizarPeso(self, alfa):
-        return 0
-    
-    def ActualizarBias(self, alfa):
-        return 0
-                    
-                
-                
+
        
     def AgregarDelta(self):
         
@@ -133,9 +129,9 @@ class Perceptron:
         for i in range(0, len(inputs)):
             self.Activacion(inputs[i])
             self.FijarSigmas([SalidasDeseadas[i]])            
-            self.FijarBias(alfa)
+            self.ActualizarBias(alfa)
             self.AgregarDelta()
-        self.FijarPesos(alfa)
+        self.ActualizarPesos(alfa)
             
         
             
@@ -147,7 +143,6 @@ class Neurona :
         self.pesos=[]
         self.bias=random.random()
         self.ultimaactivacion=0
-        self.activacion=self.bias
         for i in range(0,NumeroEntradas):
             x = random.random()
             self.pesos.append(x)
@@ -159,17 +154,18 @@ class Neurona :
         return z*(1-z)
     
     def Activacion(self, inputs):
-        self.activacion=self.bias
+        activacion=self.bias
         for i in range(0, len(self.pesos)):
           
-            self.activacion+=inputs[i]*self.pesos[i]
-        self.ultimaactivacion=self.activacion
-        return self.Sigmoide(self.activacion)
+            activacion+=inputs[i]*self.pesos[i]
+            
+        self.ultimaactivacion=activacion
+        return self.Sigmoide(activacion)
             
             
 class Capa:
     
-    def __init__(self, NumeroEntradas, cantidad_neuronas):
+    def __init__(self, cantidad_neuronas, NumeroEntradas):
         self.neuronas_capa=[]
         self.salidas=[]
         for i in range(0, cantidad_neuronas):
@@ -181,16 +177,16 @@ class Capa:
         return self.salidas
 
 entradas=[]
-entradas.append([0, 0])
 entradas.append([0, 1])
-entradas.append([1, 0])
-entradas.append([1, 1])
+#entradas.append([0, 1])
+#entradas.append([1, 0])
+#entradas.append([1, 1])
 salidas=[]
-salidas.append(1)
-salidas.append(0)
-salidas.append(0)
-salidas.append(1)
+salidas.append(0.2)
+#salidas.append(0)
+#salidas.append(0)
+#salidas.append(1)
 
 p=Perceptron([2, 3, 1])
-p.Aprendizaje(entradas, salidas, 0.3, 0.1)
+p.Aprendizaje(entradas, salidas, 0.3, 0.0005)
         
