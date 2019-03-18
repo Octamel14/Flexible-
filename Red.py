@@ -37,7 +37,8 @@ class Perceptron:
         for i in range (0, len(SalidasReales)):
             #print("La salida es ", SalidasDeseadas[i])
             #print("La salida esperada es ", SalidasReales[i])
-            error+= 0.5* m.pow((SalidasReales[i]-SalidasDeseadas[i]), 2)
+            error+= 0.5* m.pow((SalidasReales[i]-SalidasDeseadas[0][i]), 2)
+            #error+= m.pow( m.pow((SalidasReales[i]-SalidasDeseadas[i]), 2), 2)
         #print(SalidasReales)
         return error
     
@@ -50,7 +51,7 @@ class Perceptron:
         return error
     
     def Aprendizaje(self, Entrada, SalidaDeseada, alfa, errorMax):
-        error=99999
+        error=9999
         while(error>errorMax):
             self.Backpropagation(Entrada, SalidaDeseada, alfa) #
             error=self.ErrorGeneral(Entrada, SalidaDeseada)
@@ -99,12 +100,13 @@ class Perceptron:
             for j in range(0, len(self.capas[i].neuronas_capa)):
                 self.sigmas[i].append(0)
             
-        for i in range(len(self.capas)-1, 0, -1):
+        for i in range(len(self.capas)-1, -1, -1):
             for j in range(0, len(self.capas[i].neuronas_capa)):
                 if(i==len(self.capas)-1):
                     
                     y=self.capas[i].neuronas_capa[j].ultimaactivacion
-                    self.sigmas[i][j]=(Neurona(0).Sigmoide(y)-SalidaDeseadas[j])*Neurona(0).DerivadaSigmoide(y)
+            
+                    self.sigmas[i][j]=(Neurona(0).Sigmoide(y)-SalidaDeseadas[0][j])*Neurona(0).DerivadaSigmoide(y)
                 else:
                     suma=0
                     for k in range(len(self.capas[i+1].neuronas_capa)):
@@ -167,26 +169,28 @@ class Capa:
     
     def __init__(self, cantidad_neuronas, NumeroEntradas):
         self.neuronas_capa=[]
-        self.salidas=[]
+        self.salida=[]
         for i in range(0, cantidad_neuronas):
             self.neuronas_capa.append(Neurona(NumeroEntradas))
             
     def Activacion(self, inputs):
+        salidas=[]
         for i in range(0, len(self.neuronas_capa)):
-            self.salidas.append(self.neuronas_capa[i].Activacion(inputs))
-        return self.salidas
+            salidas.append(self.neuronas_capa[i].Activacion(inputs))
+        self.salida=salidas
+        return salidas
 
 entradas=[]
-entradas.append([0, 1])
+entradas.append([0, 0])
 #entradas.append([0, 1])
 #entradas.append([1, 0])
 #entradas.append([1, 1])
 salidas=[]
-salidas.append(0.2)
+salidas.append([1])
 #salidas.append(0)
 #salidas.append(0)
 #salidas.append(1)
 
-p=Perceptron([2, 3, 1])
-p.Aprendizaje(entradas, salidas, 0.3, 0.0005)
+p=Perceptron([2, 4, 3, 1])
+p.Aprendizaje(entradas, salidas, 0.4, 0.004)
         
