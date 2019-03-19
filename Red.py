@@ -1,12 +1,12 @@
 # -*- coding: utf-8 -*-
 """
 Created on Thu Mar 14 20:10:05 2019
-
 @author: ASUS
 """
 import math as m
 import random
 import numpy as np
+import cv2
 
 random.seed(0)
 
@@ -23,31 +23,28 @@ class Perceptron:
                 
     def Activacion(self, inputs):
         
-        outputs=0
+        outputs=[]
         for i in range(0, len(self.capas)):
             outputs=self.capas[i].Activacion(inputs)
             inputs=outputs
-            #print(outputs)
-        #print("Longitud ", len(outputs), "Valor ", outputs)
-        return outputs[len(outputs)-1]
+        return outputs
     
     def ErrorPorNeurona(self, SalidasReales, SalidasDeseadas):
         error=0
-        print(SalidasReales, SalidasDeseadas)
-        for i in range (0, len(SalidasReales)):
-            #print("La salida es ", SalidasDeseadas[i])
-            #print("La salida esperada es ", SalidasReales[i])
-            error+= 0.5* m.pow((SalidasReales[i]-SalidasDeseadas[0][i]), 2)
-            #error+= m.pow( m.pow((SalidasReales[i]-SalidasDeseadas[i]), 2), 2)
+        #print(SalidasReales, SalidasDeseadas)
         #print(SalidasReales)
+        for i in range (0, len(SalidasReales)):
+            error+=pow((SalidasReales[0][i]-SalidasDeseadas[0][i]), 2)
+            #error+= pow(pow((SalidasReales[0][i]-SalidasDeseadas[0][i]), 2), 0.5)
         return error
     
     
     def ErrorGeneral(self, inputs, SalidasDeseadas):
         error=0
         for i in range(0, len(inputs)):   
+            #print(self.Activacion(inputs[]))
             error+=self.ErrorPorNeurona([self.Activacion(inputs[i])], [SalidasDeseadas[i]])
-        #print(error)
+        print(error)
         return error
     
     def Aprendizaje(self, Entrada, SalidaDeseada, alfa, errorMax):
@@ -148,7 +145,9 @@ class Neurona :
         for i in range(0,NumeroEntradas):
             x = random.random()
             self.pesos.append(x)
+            
     def Sigmoide(self, y):
+        #return m.tanh(y)
         return (1/(1+m.exp(-y)))
     
     def DerivadaSigmoide(self, y):
@@ -158,9 +157,7 @@ class Neurona :
     def Activacion(self, inputs):
         activacion=self.bias
         for i in range(0, len(self.pesos)):
-          
-            activacion+=inputs[i]*self.pesos[i]
-            
+            activacion+=inputs[i]*self.pesos[i]  
         self.ultimaactivacion=activacion
         return self.Sigmoide(activacion)
             
@@ -180,17 +177,39 @@ class Capa:
         self.salida=salidas
         return salidas
 
+p=Perceptron([2, 5, 5 , 1])
 entradas=[]
 entradas.append([0, 0])
-#entradas.append([0, 1])
-#entradas.append([1, 0])
-#entradas.append([1, 1])
+entradas.append([0, 1])
+entradas.append([1, 0])
+entradas.append([1, 1])
 salidas=[]
 salidas.append([1])
-#salidas.append(0)
-#salidas.append(0)
-#salidas.append(1)
+salidas.append([0])
+salidas.append([0])
+salidas.append([1])
 
-p=Perceptron([2, 4, 3, 1])
-p.Aprendizaje(entradas, salidas, 0.4, 0.004)
-        
+p.Aprendizaje(entradas, salidas, 0.2, 0.01)
+
+"""    
+p=Perceptron([225, 8, 8, 8, 3])
+entradas=[]
+salidas=[]
+x=resize_crop_images[0]
+_, x1 = cv2.threshold(x, 250, 1, cv2.THRESH_BINARY)
+x2=x1.flatten()
+entradas.append(x2)
+
+salidas.append([0, 0, 1])
+#p.Aprendizaje(entradas, salidas, 0.5, 0.0004)
+print("Primer Aprendizaje")
+#######################################################################
+#entradas=[]
+#salidas=[]
+x=resize_crop_images[1]
+_, x1 = cv2.threshold(x, 250, 1, cv2.THRESH_BINARY)
+x2=x1.flatten()
+entradas.append(x2)
+salidas.append([1, 1, 0])
+p.Aprendizaje(entradas, salidas, 0.4, 0.3)
+"""
