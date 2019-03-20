@@ -8,7 +8,7 @@ import random
 import numpy as np
 import cv2
 
-random.seed(0)
+#random.seed(12)
 
 class Perceptron:
     def __init__(self, NumeroDeNeuronasPorCapa): #Arreglo de enteros ej. [3, 3, 3] son tres capas con tres neuronas
@@ -31,7 +31,7 @@ class Perceptron:
     
     def ErrorPorNeurona(self, SalidasReales, SalidasDeseadas):
         error=0
-        #print(SalidasReales, SalidasDeseadas)
+       # print("  ** ", SalidasReales, SalidasDeseadas)
         #print(SalidasReales)
         for i in range (0, len(SalidasReales)):
             error+=pow((SalidasReales[0][i]-SalidasDeseadas[0][i]), 2)
@@ -55,27 +55,25 @@ class Perceptron:
             #print(error)
             
     def FijarDeltas(self):
+        self.deltas=[]
         
+        for i in range(0, len(self.capas)):
+            self.deltas.append(np.zeros([len(self.capas[i].neuronas_capa), len(self.capas[i].neuronas_capa[0].pesos)]))
+        #print (self.deltas)
+     
+                #[[[0, 0], [0, 0]], [[0, 0, 0], [0, 0]], [[0], [0, 0, 0]]]
+                
+        #print (self.deltas)
+            #self.deltas=np.zeros((len(self.capas[i].neuronas_capa), len(self.capas[i].neuronas_capa[0].pesos)))
+           # self.deltas.append([None*len(self.capas[i].neuronas_capa)]*len(self.capas[i].neurones_capa[0].pesos))
         
+        """
         for i in range(0, len(self.capas)):
             self.deltas.append([])
             for j in range(0, len(self.capas[i].neuronas_capa)):
                 self.deltas[i].append([])
                 for k in range(0, len(self.capas[i].neuronas_capa[0].pesos)):
                     self.deltas[i][j].append(0)
-     
-                #[[[0, 0], [0, 0]], [[0, 0, 0], [0, 0]], [[0], [0, 0, 0]]]
-                
-            
-            #self.deltas=np.zeros((len(self.capas[i].neuronas_capa), len(self.capas[i].neuronas_capa[0].pesos)))
-           # self.deltas.append([None*len(self.capas[i].neuronas_capa)]*len(self.capas[i].neurones_capa[0].pesos))
-        
-        """
-        for i in range(0, len(self.capas)):
-            self.deltas.append(len(self.capas[i].neuronas_capa), len(self.capas[i].neuronas_capa[0].pesos))
-            for j in range(0, len(self.capas.neuronas_capa)):
-                for k in range(0, len(self.capas[i].neuronas_capa[0].pesos)):
-                    self.deltas[i][j, k]=0
                     
         """
                 
@@ -83,8 +81,7 @@ class Perceptron:
         for i in range(0, len(self.capas)):
             for j in range(0, len(self.capas[i].neuronas_capa)):
                 for k in range(0, len(self.capas[i].neuronas_capa[j].pesos)):
-                #    print(alfa*self.deltas[i][j][k])
-                    self.capas[i].neuronas_capa[j].pesos[k]-=alfa*self.deltas[i][j][k]
+                    self.capas[i].neuronas_capa[j].pesos[k]-=alfa*self.deltas[i][j, k]
                     
     def ActualizarBias(self, alfa):
         for i in range(0, len(self.capas)):
@@ -92,6 +89,7 @@ class Perceptron:
                 self.capas[i].neuronas_capa[j].bias-=alfa*self.sigmas[i][j]
                 
     def FijarSigmas(self, SalidaDeseadas):
+        self.sigmas=[]
         for i in range(0, len(self.capas)):
             self.sigmas.append([])
             for j in range(0, len(self.capas[i].neuronas_capa)):
@@ -100,13 +98,11 @@ class Perceptron:
         for i in range(len(self.capas)-1, -1, -1):
             for j in range(0, len(self.capas[i].neuronas_capa)):
                 if(i==len(self.capas)-1):
-                    
                     y=self.capas[i].neuronas_capa[j].ultimaactivacion
-            
                     self.sigmas[i][j]=(Neurona(0).Sigmoide(y)-SalidaDeseadas[0][j])*Neurona(0).DerivadaSigmoide(y)
                 else:
                     suma=0
-                    for k in range(len(self.capas[i+1].neuronas_capa)):
+                    for k in range(0, len(self.capas[i+1].neuronas_capa)):
                         suma+=self.capas[i+1].neuronas_capa[k].pesos[j]*self.sigmas[i+1][k]
                     
                     self.sigmas[i][j]=Neurona(0).DerivadaSigmoide(self.capas[i].neuronas_capa[j].ultimaactivacion)*suma
@@ -118,8 +114,9 @@ class Perceptron:
         for i in range(1, len(self.capas)):
             for j in range(0, len(self.capas[i].neuronas_capa)):
                 for k in range(0, len(self.capas[i].neuronas_capa[j].pesos)):
+                   # print(i, j, k)
                    
-                    self.deltas[i][j][k]+=self.sigmas[i][j]*Neurona(0).Sigmoide(self.capas[i-1].neuronas_capa[k].ultimaactivacion)
+                    self.deltas[i][j, k]+=self.sigmas[i][j]*Neurona(0).Sigmoide(self.capas[i-1].neuronas_capa[k].ultimaactivacion)
                     
                 
     def Backpropagation(self, inputs, SalidasDeseadas, alfa):
@@ -146,9 +143,10 @@ class Neurona :
             x = random.random()
             self.pesos.append(x)
             
-    def Sigmoide(self, y):
-        #return m.tanh(y)
-        return (1/(1+m.exp(-y)))
+    def Sigmoide(self, gamma):
+        if gamma < 0:
+            return 1 - 1 / (1 + m.exp(gamma))
+        return 1 / (1 + m.exp(-gamma)) 
     
     def DerivadaSigmoide(self, y):
         z=self.Sigmoide(y)
@@ -160,6 +158,7 @@ class Neurona :
             activacion+=inputs[i]*self.pesos[i]  
         self.ultimaactivacion=activacion
         return self.Sigmoide(activacion)
+    
             
             
 class Capa:
@@ -177,22 +176,24 @@ class Capa:
         self.salida=salidas
         return salidas
 
-p=Perceptron([2, 5, 5 , 1])
+
+p=Perceptron([2, 4, 2])
 entradas=[]
 entradas.append([0, 0])
 entradas.append([0, 1])
 entradas.append([1, 0])
 entradas.append([1, 1])
 salidas=[]
-salidas.append([1])
-salidas.append([0])
-salidas.append([0])
-salidas.append([1])
+salidas.append([1, 0])
+salidas.append([0, 0])
+salidas.append([0, 1])
+salidas.append([1, 1])
 
-p.Aprendizaje(entradas, salidas, 0.2, 0.01)
+p.Aprendizaje(entradas, salidas, 0.1 , 0.001)
 
-"""    
-p=Perceptron([225, 8, 8, 8, 3])
+
+"""
+p=Perceptron([36, 5, 1])
 entradas=[]
 salidas=[]
 x=resize_crop_images[0]
@@ -200,16 +201,21 @@ _, x1 = cv2.threshold(x, 250, 1, cv2.THRESH_BINARY)
 x2=x1.flatten()
 entradas.append(x2)
 
-salidas.append([0, 0, 1])
-#p.Aprendizaje(entradas, salidas, 0.5, 0.0004)
-print("Primer Aprendizaje")
+salidas.append([0.8])
+#p.Aprendizaje(entradas, salidas, 0.1, 0.01)
+
+
 #######################################################################
-#entradas=[]
-#salidas=[]
+x=[]
+x1=[]
+x2=[]
 x=resize_crop_images[1]
 _, x1 = cv2.threshold(x, 250, 1, cv2.THRESH_BINARY)
-x2=x1.flatten()
+x2=x1.flatten() 
 entradas.append(x2)
-salidas.append([1, 1, 0])
-p.Aprendizaje(entradas, salidas, 0.4, 0.3)
+
+salidas.append([0.2])
+
+p.Aprendizaje(entradas, salidas, .1, 0.01)
+
 """
