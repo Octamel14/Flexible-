@@ -31,11 +31,11 @@ class Perceptron:
     
     def ErrorPorNeurona(self, SalidasReales, SalidasDeseadas):
         error=0
-       # print("  ** ", SalidasReales, SalidasDeseadas)
+        #print("  ** ", SalidasReales, SalidasDeseadas)
         #print(SalidasReales)
         for i in range (0, len(SalidasReales)):
-            error+=pow((SalidasReales[0][i]-SalidasDeseadas[0][i]), 2)
-            #error+= pow(pow((SalidasReales[0][i]-SalidasDeseadas[0][i]), 2), 0.5)
+            #error+=pow((SalidasReales[0][i]-SalidasDeseadas[0][i]), 2)
+            error+= pow(pow((SalidasReales[0][i]-SalidasDeseadas[0][i]), 2), 0.5)
         return error
     
     
@@ -137,10 +137,10 @@ class Perceptron:
 class Neurona :
     def __init__(self, NumeroEntradas):
         self.pesos=[]
-        self.bias=random.random()
+        self.bias=random.random()*10-5
         self.ultimaactivacion=0
         for i in range(0,NumeroEntradas):
-            x = random.random()
+            x = random.random()*10-5
             self.pesos.append(x)
             
     def Sigmoide(self, gamma):
@@ -175,47 +175,46 @@ class Capa:
             salidas.append(self.neuronas_capa[i].Activacion(inputs))
         self.salida=salidas
         return salidas
+"""
 
-
-p=Perceptron([2, 4, 2])
+p=Perceptron([2, 4, 4, 1])
 entradas=[]
 entradas.append([0, 0])
 entradas.append([0, 1])
 entradas.append([1, 0])
 entradas.append([1, 1])
 salidas=[]
-salidas.append([1, 0])
-salidas.append([0, 0])
-salidas.append([0, 1])
-salidas.append([1, 1])
+salidas.append([1])
+salidas.append([0])
+salidas.append([0])
+salidas.append([1])
 
-p.Aprendizaje(entradas, salidas, 0.1 , 0.001)
-
-
+p.Aprendizaje(entradas, salidas, 0.3 , 0.01)
 """
-p=Perceptron([36, 5, 1])
-entradas=[]
+
+
+p=Perceptron([81, 10, 4])
+
 salidas=[]
-x=resize_crop_images[0]
-_, x1 = cv2.threshold(x, 250, 1, cv2.THRESH_BINARY)
-x2=x1.flatten()
-entradas.append(x2)
 
-salidas.append([0.8])
-#p.Aprendizaje(entradas, salidas, 0.1, 0.01)
+for i in range(0, len(crop)):
+    _, x1 = cv2.threshold(crop[i], 250, 1, cv2.THRESH_BINARY)
+    x2=x1.flatten()
+    entradas.append(x2)
+    
+
+    
+
+salidas.append([0, 0, 0, 1])
+salidas.append([0, 0, 1, 0])
+salidas.append([0, 0, 1, 1])
+salidas.append([0, 1, 0, 0])
+salidas.append([0, 1, 0, 1])
+salidas.append([0, 1, 1, 0])
+salidas.append([0, 1, 1, 1])
+salidas.append([1, 0, 0, 0])
+salidas.append([1, 0, 0, 1])
+salidas.append([0, 0, 0, 0])
+p.Aprendizaje(entradas, salidas, 0.4, 0.01)
 
 
-#######################################################################
-x=[]
-x1=[]
-x2=[]
-x=resize_crop_images[1]
-_, x1 = cv2.threshold(x, 250, 1, cv2.THRESH_BINARY)
-x2=x1.flatten() 
-entradas.append(x2)
-
-salidas.append([0.2])
-
-p.Aprendizaje(entradas, salidas, .1, 0.01)
-
-"""
